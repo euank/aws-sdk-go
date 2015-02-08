@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/awslabs/aws-sdk-go/aws/awsreader"
 )
 
 const (
@@ -39,7 +40,7 @@ type signer struct {
 	SecretAccessKey string
 	SessionToken    string
 	Query           url.Values
-	Body            io.ReadSeeker
+	Body            awsreader.AWSReader
 	Debug           uint
 
 	formattedTime      string
@@ -220,7 +221,7 @@ func (v4 *signer) bodyDigest() string {
 				hash = hex.EncodeToString(makeSha256([]byte{}))
 			}
 		} else {
-			hash = hex.EncodeToString(makeSha256Reader(v4.Body))
+			hash = hex.EncodeToString(v4.Body.Sha256Sum())
 		}
 		v4.Request.Header.Add("X-Amz-Content-Sha256", hash)
 	}

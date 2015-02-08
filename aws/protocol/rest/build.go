@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/awslabs/aws-sdk-go/aws/awsreader"
 )
 
 func Build(r *aws.Request) {
@@ -42,8 +43,8 @@ func buildHeaders(r *aws.Request, v reflect.Value) {
 func buildBody(r *aws.Request, v reflect.Value) {
 	payload := v.FieldByName(r.Operation.InPayload)
 	if payload.IsValid() && payload.Type().Kind() == reflect.Interface {
-		reader := payload.Interface().(io.ReadSeeker)
-		r.SetReaderBody(reader)
+		reader := payload.Interface().(io.Reader)
+		r.SetReaderBody(awsreader.NewInMemory(reader))
 	}
 }
 

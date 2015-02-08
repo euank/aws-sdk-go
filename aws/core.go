@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"container/list"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"reflect"
 	"regexp"
 	"time"
+
+	"github.com/awslabs/aws-sdk-go/aws/awsreader"
 )
 
 const SDKName = "aws-sdk-go"
@@ -75,7 +75,7 @@ type Request struct {
 	Operation    *Operation
 	HTTPRequest  *http.Request
 	HTTPResponse *http.Response
-	Body         io.ReadSeeker
+	Body         awsreader.AWSReader
 	Params       interface{}
 	Error        error
 	Data         interface{}
@@ -157,12 +157,12 @@ func (r Request) DataFilled() bool {
 }
 
 func (r *Request) SetBufferBody(buf []byte) {
-	r.SetReaderBody(bytes.NewReader(buf))
+	r.SetReaderBody(awsreader.NewInMemory(bytes.NewReader(buf)))
 }
 
-func (r *Request) SetReaderBody(reader io.ReadSeeker) {
-	r.HTTPRequest.Body = ioutil.NopCloser(reader)
+func (r *Request) SetReaderBody(reader awsreader.AWSReader) {
 	r.Body = reader
+	r.HTTPRequest.Body = reader
 }
 
 func (r *Request) Presign(expireTime time.Duration) (string, error) {

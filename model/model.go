@@ -253,7 +253,7 @@ func (m Member) Shape() *Shape {
 // Type returns the member's Go type.
 func (m Member) Type() string {
 	if m.Streaming {
-		return "io.Reader" // this allows us to pass the S3 body directly
+		return "awsreader.AWSReader" // this allows us to require users to be more explicit about reader tradeoffs
 	}
 	return m.Shape().Type()
 }
